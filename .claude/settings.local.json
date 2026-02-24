@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /e/clickclash && npm install 2>&1)",
+      "Bash(tail:*)",
+      "Bash(cd /e/clickclash && node -e \"console.log\\(require\\('./node_modules/next/package.json'\\).version\\)\" 2>&1)",
+      "Bash(cd /e/clickclash && npm run build 2>&1)",
+      "Bash(head:*)",
+      "Bash(cd E:/clickclash && npx tsc --noEmit --project tsconfig.json 2>&1)",
+      "Bash(cd:*)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill:*)",
+      "Bash(cd E:/clickclash && node test-phase4.mjs 2>&1)",
+      "Bash(xargs -r taskkill //F //PID)",
+      "Bash(cd E:/clickclash && node test-phase5.mjs 2>&1)",
+      "Bash(cd E:/clickclash && npx tsc --noEmit 2>&1)"
+    ]
+  }
+}

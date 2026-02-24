@@ -1,0 +1,123 @@
+/* ============================================================
+   ClickClash — Global Styles
+   Crayon / hand-drawn aesthetic with pastel paper texture.
+   Font: Patrick Hand (loaded via layout.tsx <head> link).
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- CSS custom properties (single source of truth for theme) ---- */
+:root {
+  --color-cream:   #FFF8ED;
+  --color-paper:   #FFF3D6;
+  --color-yellow:  #FFD166;
+  --color-orange:  #FF9A3C;
+  --color-pink:    #FF6B9D;
+  --color-blue:    #6BCBFF;
+  --color-teal:    #4ECDC4;
+  --color-green:   #A8E6CF;
+  --color-purple:  #C3A1FF;
+  --color-red:     #FF6B6B;
+  --color-ink:     #2D2D2D;
+  --color-muted:   #7A7A6E;
+  --color-border:  #3D3929;
+
+  /* Texture: tiny alternating dots to simulate paper grain */
+  --texture-bg: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.04) 1px,
+      transparent 1px
+    )
+    0 0 / 4px 4px;
+}
+
+/* ---- Base reset & font ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Patrick Hand', cursive;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--color-cream);
+  /* Layered: radial dot texture over the cream base */
+  background-image: var(--texture-bg);
+  color: var(--color-ink);
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* ---- Typography scale ---- */
+h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.15; }
+h2 { font-size: clamp(1.4rem, 4vw, 2.25rem); line-height: 1.2; }
+h3 { font-size: clamp(1.1rem, 3vw, 1.5rem); line-height: 1.25; }
+p  { font-size: clamp(1rem, 2.5vw, 1.125rem); line-height: 1.6; }
+
+/* ---- Focus ring (accessibility) ---- */
+:focus-visible {
+  outline: 3px solid var(--color-pink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- Utility: paper card surface ---- */
+.paper-surface {
+  background-color: var(--color-paper);
+  background-image: var(--texture-bg);
+}
+
+/* ---- Crayon border helper ---- */
+/* Gives a slightly uneven, hand-drawn border feel via thick border + shadow */
+.crayon-border {
+  border: 2.5px solid var(--color-border);
+  box-shadow: 3px 3px 0px var(--color-border);
+}
+
+/* ---- Hover wiggle for buttons ---- */
+@keyframes wiggle {
+  0%   { transform: rotate(-1deg) scale(1.01); }
+  50%  { transform: rotate(1deg) scale(1.02); }
+  100% { transform: rotate(-1deg) scale(1.01); }
+}
+
+.hover-wiggle:hover {
+  animation: wiggle 0.35s ease-in-out;
+}
+
+/* ---- Pulse animation for "waiting" indicator ---- */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+/* ---- Toast slide-in ---- */
+@keyframes slide-in-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.toast-enter {
+  animation: slide-in-up 0.3s ease-out forwards;
+}
+
+/* ---- Scrollbar styling (cosmetic) ---- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-cream); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-yellow);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+}
