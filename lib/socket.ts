@@ -109,12 +109,27 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
 export function getSocket(): Socket<ServerToClientEvents, ClientToServerEvents> {
   if (!socket) {
+    // Always read from env; fallback only for local dev (never used in production).
     const url =
-      (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_SOCKET_URL) ||
-      "http://localhost:3001";
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+
+    if (!url) {
+      console.error(
+        "[socket] NEXT_PUBLIC_SOCKET_URL is not set. " +
+          "Add it to your deployment environment variables."
+      );
+    }
+
+    console.log("[socket] connecting", { url });
 
     socket = io(url, {
       autoConnect: false,
+      // Start with WebSocket, fall back to polling if the upgrade fails.
+      // Polling is required for the initial Socket.IO HTTP handshake on many
+      // hosted envs (Render, Railway, etc.) before the WS upgrade completes.
+      transports: ["websocket", "polling"],
+      withCredentials: false,
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -122,7 +137,7 @@ export function getSocket(): Socket<ServerToClientEvents, ClientToServerEvents> 
     });
 
     socket.on("connect", () => {
-      console.log("[socket] connected:", socket!.id);
+      console.log("[socket] connecting", { url, id: socket!.id, connected: socket!.connected });
     });
     socket.on("disconnect", (reason) => {
       console.log("[socket] disconnected:", reason);
@@ -147,7 +162,7 @@ export async function ensureConnected(
 
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error("Could not connect to the game server. Is it running?"));
+      reject(new Error("CONNECT_FAILED"));
     }, timeoutMs);
 
     s.once("connect", () => {
@@ -155,9 +170,9 @@ export async function ensureConnected(
       resolve(s);
     });
 
-    s.once("connect_error", (err) => {
+    s.once("connect_error", () => {
       clearTimeout(timer);
-      reject(new Error(`Server connection failed: ${err.message}`));
+      reject(new Error("CONNECT_FAILED"));
     });
 
     s.connect();

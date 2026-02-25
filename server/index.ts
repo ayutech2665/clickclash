@@ -19,7 +19,8 @@ const app = express();
 const httpServer = createServer(app);
 
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
-const PORT = parseInt(process.env.SOCKET_PORT || "3001", 10);
+// Render (and most PaaS) inject PORT automatically. SOCKET_PORT is the local-dev override.
+const PORT = parseInt(process.env.PORT || process.env.SOCKET_PORT || "3001", 10);
 
 const io = new Server(httpServer, {
   cors: {
@@ -31,7 +32,12 @@ const io = new Server(httpServer, {
 const roomManager = new RoomManager();
 const voiceManager = new VoiceManager();
 
-// ---- HTTP health check ----
+// ---- HTTP health checks ----
+// GET / — Render's default health-check path; must return 2xx or the service
+//          is marked unhealthy, restarted, and all socket connections drop.
+app.get("/", (_req, res) => {
+  res.json({ status: "ok" });
+});
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
@@ -480,7 +486,11 @@ io.on("connection", (socket) => {
 });
 
 // ---- Start ----
-httpServer.listen(PORT, () => {
-  console.log(`[server] ClickClash Socket.IO running on http://localhost:${PORT}`);
+// Bind to 0.0.0.0 so the process is reachable on all network interfaces.
+// Render (and other PaaS) route external traffic to the container's assigned
+// PORT; binding to 127.0.0.1 (Node default) means nothing outside the
+// container can reach the server even if PORT is set correctly.
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`[server] ClickClash Socket.IO listening on 0.0.0.0:${PORT}`);
   console.log(`[server] CORS origin: ${CORS_ORIGIN}`);
 });

@@ -36,7 +36,8 @@ type PlayState =
   | "revealed"        // reveal received — correct answer + per-player table visible
   | "ended"
   | "expired"
-  | "not_found";
+  | "not_found"
+  | "connect_error";
 
 // ============================================================
 // ScoreBar — module-level component (NEVER inside PlayPage).
@@ -350,7 +351,9 @@ export default function PlayPage() {
         }
       } catch (err) {
         const msg = (err as Error).message;
-        setPlayState(isRoomNotFound(msg) ? "not_found" : "expired");
+        if (msg === "CONNECT_FAILED") setPlayState("connect_error");
+        else if (isRoomNotFound(msg)) setPlayState("not_found");
+        else setPlayState("expired");
       }
     }
 
@@ -479,6 +482,30 @@ export default function PlayPage() {
               role="status" aria-label="Loading game…"
             />
             <p className="text-lg font-bold" style={{ color: "var(--color-muted)" }}>Loading game…</p>
+          </div>
+        </PageShell>
+      </>
+    );
+  }
+
+  // ============================================================
+  // Connection error
+  // ============================================================
+  if (playState === "connect_error") {
+    return (
+      <>
+        <HeaderBar />
+        <PageShell>
+          <div className="mt-8">
+            <CrayonCard variant="muted">
+              <h2 className="mb-2" style={{ color: "var(--color-ink)" }}>Can&apos;t Connect</h2>
+              <p className="mb-4 text-sm" style={{ color: "var(--color-muted)" }}>
+                Can&apos;t connect to the game server. Refresh the page or check your network.
+              </p>
+              <CrayonButton variant="primary" size="md" onClick={() => window.location.reload()}>
+                Refresh
+              </CrayonButton>
+            </CrayonCard>
           </div>
         </PageShell>
       </>

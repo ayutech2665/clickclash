@@ -23,7 +23,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { useVoiceControls, useVoiceActivity } from "@/lib/voice/VoiceContext";
 import type { RoomPublicState, Player } from "@/lib/types";
 
-type PageState = "connecting" | "lobby" | "expired";
+type PageState = "connecting" | "lobby" | "expired" | "connect_error";
 
 export default function RoomLobbyPage() {
   const params  = useParams();
@@ -115,7 +115,8 @@ export default function RoomLobbyPage() {
         setPageState("lobby");
       } catch (err) {
         console.error("[lobby] connect error:", err);
-        setPageState("expired");
+        const msg = (err as Error).message;
+        setPageState(msg === "CONNECT_FAILED" ? "connect_error" : "expired");
       }
     }
 
@@ -192,6 +193,30 @@ export default function RoomLobbyPage() {
             <p className="text-lg font-bold" style={{ color: "var(--color-muted)" }}>
               Connecting to room…
             </p>
+          </div>
+        </PageShell>
+      </>
+    );
+  }
+
+  // ============================================================
+  // Connection error
+  // ============================================================
+  if (pageState === "connect_error") {
+    return (
+      <>
+        <HeaderBar />
+        <PageShell>
+          <div className="mt-8">
+            <CrayonCard variant="muted">
+              <h2 className="mb-2" style={{ color: "var(--color-ink)" }}>Can&apos;t Connect</h2>
+              <p className="mb-4 text-sm" style={{ color: "var(--color-muted)" }}>
+                Can&apos;t connect to the game server. Refresh the page or check your network.
+              </p>
+              <CrayonButton variant="primary" size="md" onClick={() => window.location.reload()}>
+                Refresh
+              </CrayonButton>
+            </CrayonCard>
           </div>
         </PageShell>
       </>
